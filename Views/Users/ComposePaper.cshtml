@@ -1,0 +1,45 @@
+﻿@model Exam1_7.Models.ViewModels.SingleMultipleViewModel
+
+@{
+    ViewBag.Title = "ComposePaper";
+}
+
+<h2>ComposePaper</h2>
+<h3>学生: @User.Identity.Name</h3>
+
+@using (Html.BeginForm("SubmitPaper", "Users", FormMethod.Post))
+{
+    <h3>单选题</h3>
+    <ol>
+        @foreach (var item in Model.Single)
+        {
+            <li>
+                @item.Title
+                <ol type="A">
+                    <li><input type="radio" name="Single_@item.ID" value="A" /> @item.AnswerA</li>
+                    <li><input type="radio" name="Single_@item.ID" value="B" /> @item.AnswerB</li>
+                    <li><input type="radio" name="Single_@item.ID" value="C" /> @item.AnswerC</li>
+                    <li><input type="radio" name="Single_@item.ID" value="D" /> @item.AnswerD</li>
+                </ol>
+            </li>
+        }
+    </ol>
+
+    <h3>多选题</h3>
+    <ol>
+        @foreach (var item in Model.Multiple)
+        {
+            <li>
+                @item.Title
+                <ol type="A">
+                    <li><input type="checkbox" name="@( "Multi_" + item.ID + "[]" )" value="A" /> @item.AnswerA</li>
+                    <li><input type="checkbox" name="@( "Multi_" + item.ID + "[]" )" value="B" /> @item.AnswerB</li>
+                    <li><input type="checkbox" name="@( "Multi_" + item.ID + "[]" )" value="C" /> @item.AnswerC</li>
+                    <li><input type="checkbox" name="@( "Multi_" + item.ID + "[]" )" value="D" /> @item.AnswerD</li>
+                </ol>
+            </li>
+        }
+    </ol>
+
+    <input type="submit" value="提交试卷" />
+}

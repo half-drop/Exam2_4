@@ -1,0 +1,12 @@
+﻿@{
+    ViewBag.Title = "Exam Results";
+}
+
+<h2>考试结果</h2>
+<h3>学生: @User.Identity.Name</h3>
+
+<p>您的总分是: @ViewBag.Score 分</p>
+
+<p>@Html.ActionLink("返回主页", "Index", "Home")</p>
+<p>@Html.ActionLink("重新做答", "Composepaper", "Users")</p>
+<p>@Html.ActionLink("转到登录", "Login", "Users")</p>

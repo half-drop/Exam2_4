@@ -1,0 +1,43 @@
+﻿@model IEnumerable<Exam1_7.Models.Score>
+
+@{
+    ViewBag.Title = "GetUserOrderBy";
+}
+
+<h2>GetUserOrderBy</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            课程号
+        </th>
+        <th>
+            考试时间
+        </th>
+        <th>
+            成绩
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in (IEnumerable<object>)ViewData["score"])
+    {
+        <tr>
+            <td>
+                @{ var courseid = item.GetType().GetProperty("CourseID").GetValue(item, null);}
+                @courseid
+            </td>
+            <td>
+                @{ var examtime = item.GetType().GetProperty("ExamTime").GetValue(item, null);}
+                @examtime
+            </td>
+            <td>
+                @{ var score = item.GetType().GetProperty("Score1").GetValue(item, null);}
+                @score
+            </td>
+        </tr>
+    }
+</table>

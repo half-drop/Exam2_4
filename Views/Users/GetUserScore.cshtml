@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = "GetUserScore";
+}
+
+<h2>GetUserScore</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            姓名
+        </th>
+        <th>
+            班级
+        </th>
+        <th>
+            课程号
+        </th>
+        <th>
+            考试时间
+        </th>
+        <th>
+            成绩
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in (IEnumerable<object>)ViewData["us"])
+    {
+        <tr>
+            <td>
+                @{ var username = item.GetType().GetProperty("UserName").GetValue(item, null);}
+                @username
+            </td>
+            <td>
+                @{ var classname = item.GetType().GetProperty("Classname").GetValue(item, null);}
+                @classname
+            </td>
+            <td>
+                @{ var courseid = item.GetType().GetProperty("CourseID").GetValue(item, null);}
+                @courseid
+            </td>
+            <td>
+                @{ var examtime = item.GetType().GetProperty("ExamTime").GetValue(item, null);}
+                @examtime
+            </td>
+            <td>
+                @{ var score = item.GetType().GetProperty("Score1").GetValue(item, null);}
+                @score
+            </td>
+        </tr>
+    }
+</table>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="4c700b715d47496d85604e18da5ae587" Name="Diagram1">
+        <EntityTypeShape EntityType="OnlineExamModel.Course" Width="1.5" PointX="0.75" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.FillBlankProblem" Width="1.5" PointX="3" PointY="5.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.JudgeProblem" Width="1.5" PointX="3" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.MultiProblem" Width="1.5" PointX="3" PointY="11.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.Paper" Width="1.5" PointX="3" PointY="15.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.PaperDetail" Width="1.5" PointX="5.25" PointY="15.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.Score" Width="1.5" PointX="8" PointY="12.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.SingleProblem" Width="1.5" PointX="3" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.StudentExam" Width="1.5" PointX="8" PointY="7.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.StudentFillBlankProblem" Width="1.5" PointX="5.25" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.StudentJudgeProblem" Width="1.5" PointX="5.25" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.StudentMultiProblem" Width="1.5" PointX="5.25" PointY="11.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.StudentSingle" Width="1.5" PointX="5.25" PointY="22.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.sysdiagram" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OnlineExamModel.User" Width="1.5" PointX="6.125" PointY="2.375" IsExpanded="true" />
+        <AssociationConnector Association="OnlineExamModel.FK_FillBlankProblem_Course" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_JudgeProblem_Course" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_MultiProblem_Course" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_Paper_Course" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_Score_Course" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_SingleProblem_Course" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentExam_Course" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentFillBlankProblem_FillBlankProblem" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentJudgeProblem_JudgeProblem" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentMultiProblem_MultiProblem" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_PaperDetail_Paper1" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_Score_Users" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentSingle_SingleProblem" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentExam_Users" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentFillBlankProblem_StudentExam" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentJudgeProblem_StudentExam" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentMultiProblem_StudentExam" ManuallyRouted="false" />
+        <AssociationConnector Association="OnlineExamModel.FK_StudentSingle_StudentExam" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
