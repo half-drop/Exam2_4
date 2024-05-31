@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Exam1_7.Models.Course>
+
+@{
+    ViewBag.Title = "课程";
+}
+
+<h2>课程</h2>
+
+<p>
+    @Html.ActionLink("新建课程", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            课程名称
+        </th>
+        <th>
+            是否有效
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsValid)
+            </td>
+            <td>
+                @Html.ActionLink("编辑", "Edit", new { id = item.ID }) |
+                @Html.ActionLink("详情", "Details", new { id = item.ID }) |
+                @Html.ActionLink("删除", "Delete", new { id = item.ID })
+            </td>
+        </tr>
+    }
+</table>

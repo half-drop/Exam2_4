@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Exam1_7.Models.User>
+
+@{
+    ViewBag.Title = "GetUser";
+}
+
+<h2>GetUser</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.UserName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Classname)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in (IEnumerable<object>)ViewData["us"])
+    {
+        <tr>
+            <td>
+                @{ var username = item.GetType().GetProperty("UserName").GetValue(item, null);}
+                @username
+            </td>
+            <td>
+                @{ var classname = item.GetType().GetProperty("classname").GetValue(item, null);}
+                @classname
+            </td>
+        </tr>
+    }
+</table>

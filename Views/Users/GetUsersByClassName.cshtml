@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Exam1_7.Models.User>
+
+@{
+    ViewBag.Title = "GetUsersByClassName";
+}
+
+<h2>GetUsersByClassName</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.UserName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserPwd)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserPower)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Classname)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserEmail)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserPwd)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserPower)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Classname)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserEmail)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.UserID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.UserID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.UserID })
+        </td>
+    </tr>
+}
+
+</table>

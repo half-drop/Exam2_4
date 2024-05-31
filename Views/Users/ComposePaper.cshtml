@@ -1,0 +1,52 @@
+﻿@model Exam1_7.Models.ViewModels.SingleMultipleViewModel
+
+@{
+    ViewBag.Title = "ComposePaper";
+}
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        var link = document.createElement('a');
+        link.href = '@Url.Content("~/Content/file/考试须知.txt")';
+        link.download = '考试须知.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+</script>
+
+<h2>ComposePaper</h2>
+<h3>学生: @TempData["Username"]</h3>
+
+<p>@Html.ActionLink("返回主页", "Index", "Home")</p>
+
+<h3>单选题 (共10题)</h3>
+<ol>
+    @foreach (var item in Model.Single)
+    {
+        <li>
+            @item.Title
+            <ol type="A">
+                <li>@item.AnswerA</li>
+                <li>@item.AnswerB</li>
+                <li>@item.AnswerC</li>
+                <li>@item.AnswerD</li>
+            </ol>
+        </li>
+    }
+</ol>
+
+<h3>多选题 (共10题)</h3>
+<ol>
+    @foreach (var item in Model.Multiple)
+    {
+        <li>
+            @item.Title
+            <ol type="A">
+                <li>@item.AnswerA</li>
+                <li>@item.AnswerB</li>
+                <li>@item.AnswerC</li>
+                <li>@item.AnswerD</li>
+            </ol>
+        </li>
+    }
+</ol>

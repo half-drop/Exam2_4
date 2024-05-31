@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Exam1_7.Models.User>
+
+@{
+    ViewBag.Title = "首页";
+}
+
+<h2>首页</h2>
+
+<p>
+    @Html.ActionLink("添加", "Register")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            用户名
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserPwd)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserPower)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Classname)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserEmail)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserPwd)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserPower)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Classname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserEmail)
+            </td>
+            <td>
+                @Html.ActionLink("编辑", "Edit", new { id = item.UserID }) |
+                @Html.ActionLink("详情", "Details", new { id = item.UserID }) |
+                @Html.ActionLink("删除", "Delete", new { id = item.UserID })
+            </td>
+        </tr>
+    }
+</table>
