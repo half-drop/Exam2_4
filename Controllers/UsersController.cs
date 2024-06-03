@@ -395,6 +395,7 @@ namespace Exam1_7.Controllers
 
         public ActionResult TakeExam(int paperId)
         {
+            var user = db.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
             var paper = db.Papers.Include(p => p.PaperDetails).FirstOrDefault(p => p.PaperID == paperId);
             if (paper == null)
             {
@@ -404,11 +405,11 @@ namespace Exam1_7.Controllers
             // 创建或更新学生的考试记录
             var studentExam = new StudentExam
             {
-                UserID = User.Identity.Name,  // 假设用户已登录并且用户名可以通过User.Identity.Name获取
+                UserID = user.UserID,
                 CourseID = paper.CourseID,
                 PaperID = paperId,
                 BegainTime = DateTime.Now,
-                ExamState = "Started"  // 标记考试状态为开始
+                ExamState = "Started"
             };
 
             db.StudentExams.Add(studentExam);
@@ -492,6 +493,7 @@ namespace Exam1_7.Controllers
                 var problem = db.MultiProblems.Find(detail.TitleID);
                 var userAnswers = answers.AllKeys
                     .Where(k => k.StartsWith("Multi_" + problem.ID + "["))
+                    .Select(a => a.Trim().Replace(",", ""))
                     .Select(k => answers[k])
                     .OrderBy(a => a);
 
@@ -502,7 +504,7 @@ namespace Exam1_7.Controllers
                 {
                     StudentExamId = studentExam.StudentExamId,
                     MultiProblemID = problem.ID,
-                    answer = string.Join(",", userAnswers)
+                    answer = string.Join("", userAnswers)
                 });
 
                 totalScore += isCorrect ? detail.Mark : 0;
@@ -531,9 +533,10 @@ namespace Exam1_7.Controllers
             db.SaveChanges();
 
             // 将分数保存到Score表
+            var user = db.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
             var score = new Score
             {
-                UserID = User.Identity.Name,
+                UserID = user.UserID,
                 PaperID = paperId,
                 CourseID = paper.CourseID,
                 Score1 = totalScore,
@@ -571,7 +574,8 @@ namespace Exam1_7.Controllers
 
         public ActionResult HistoryScores()
         {
-            string userId = User.Identity.Name;
+            var user = db.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
+            string userId = user.UserID;
 
             var historyScores = (from se in db.StudentExams
                                  join p in db.Papers on se.PaperID equals p.PaperID

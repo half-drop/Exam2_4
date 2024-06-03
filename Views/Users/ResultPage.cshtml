@@ -7,7 +7,7 @@
 @foreach (var answer in Model.StudentJudgeProblems)
 {
     <p>题目: @answer.JudgeProblem.Title</p>
-    <p>您的答案: @answer.answer</p>
+    <p>您的答案: @((answer.answer.HasValue) ? (answer.answer.Value ? "True" : "False") : "未作答")</p>
     <p>正确答案: @(answer.JudgeProblem.Answer ? "True" : "False")</p>
     <p>结果: @(answer.answer == answer.JudgeProblem.Answer ? "正确" : "错误")</p>
 }
