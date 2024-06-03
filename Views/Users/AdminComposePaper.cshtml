@@ -1,0 +1,59 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>创建试卷</title>
+</head>
+<body>
+    <h1>创建新试卷</h1>
+
+    @using (Html.BeginForm("AdminComposePaper", "Users", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div>
+            <label>试卷名称:</label>
+            @Html.TextBox("paperName")
+            @Html.ValidationMessage("paperName")
+        </div>
+
+        <div>
+            <label>判断题数量:</label>
+            @Html.TextBox("judgeCount", null, new { type = "number" })
+            <label>每题分数:</label>
+            @Html.TextBox("judgeMark", null, new { type = "number" })
+        </div>
+
+        <div>
+            <label>单选题数量:</label>
+            @Html.TextBox("singleCount", null, new { type = "number" })
+            <label>每题分数:</label>
+            @Html.TextBox("singleMark", null, new { type = "number" })
+        </div>
+
+        <div>
+            <label>多选题数量:</label>
+            @Html.TextBox("multiCount", null, new { type = "number" })
+            <label>每题分数:</label>
+            @Html.TextBox("multiMark", null, new { type = "number" })
+        </div>
+
+        <div>
+            <label>填空题数量:</label>
+            @Html.TextBox("fillBlankCount", null, new { type = "number" })
+            <label>每题分数:</label>
+            @Html.TextBox("fillBlankMark", null, new { type = "number" })
+        </div>
+
+        <button type="submit">创建试卷</button>
+    }
+
+    @if (ViewBag.Error != null)
+    {
+        <p style="color: red;">@ViewBag.Error</p>
+    }
+</body>
+</html>

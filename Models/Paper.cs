@@ -11,25 +11,24 @@ namespace Exam1_7.Models
 {
     using System;
     using System.Collections.Generic;
-    
+
     public partial class Paper
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Paper()
         {
             this.PaperDetails = new HashSet<PaperDetail>();
         }
-    
+
         public int PaperID { get; set; }
         public int CourseID { get; set; }
         public string PaperName { get; set; }
         public bool PaperState { get; set; }
-        public System.DateTime Time { get; set; }
-        public int Longth { get; set; }
+        public DateTime Time { get; set; }
+        public int Longth { get; set; } // 注意这里是否是正确的拼写
         public double SumMark { get; set; }
-    
+
         public virtual Course Course { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PaperDetail> PaperDetails { get; set; }
     }
+
 }

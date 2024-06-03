@@ -1,0 +1,40 @@
+﻿@model Exam1_7.Models.StudentExam
+
+<h1>考试结果</h1>
+<h2>总分: @ViewBag.TotalScore</h2>
+
+<h3>判断题</h3>
+@foreach (var answer in Model.StudentJudgeProblems)
+{
+    <p>题目: @answer.JudgeProblem.Title</p>
+    <p>您的答案: @answer.answer</p>
+    <p>正确答案: @(answer.JudgeProblem.Answer ? "True" : "False")</p>
+    <p>结果: @(answer.answer == answer.JudgeProblem.Answer ? "正确" : "错误")</p>
+}
+
+<h3>单选题</h3>
+@foreach (var answer in Model.StudentSingles)
+{
+    <p>题目: @answer.SingleProblem.Title</p>
+    <p>您的答案: @answer.answer</p>
+    <p>正确答案: @answer.SingleProblem.Answer</p>
+    <p>结果: @(answer.answer == answer.SingleProblem.Answer ? "正确" : "错误")</p>
+}
+
+<h3>多选题</h3>
+@foreach (var answer in Model.StudentMultiProblems)
+{
+    <p>题目: @answer.MultiProblem.Title</p>
+    <p>您的答案: @answer.answer</p>
+    <p>正确答案: @answer.MultiProblem.Answer</p>
+    <p>结果: @(answer.answer == answer.MultiProblem.Answer ? "正确" : "错误")</p>
+}
+
+<h3>填空题</h3>
+@foreach (var answer in Model.StudentFillBlankProblems)
+{
+    <p>题目: @Html.Raw(@answer.FillBlankProblem.FrontTitle + "_____" + @answer.FillBlankProblem.BackTitle)</p>
+    <p>您的答案: @answer.answer</p>
+    <p>正确答案: @answer.FillBlankProblem.Answer</p>
+    <p>结果: @(answer.answer == answer.FillBlankProblem.Answer ? "正确" : "错误")</p>
+}

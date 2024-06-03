@@ -37,7 +37,7 @@ public class User_Validation
 
     [Required(ErrorMessage = "班级不能为空")]
     [DisplayName("班级")]
-    public string UserClass { get; set; }
+    public string Classname { get; set; }
 
     [Required(ErrorMessage = "确认密码不能为空")]
     [Compare("UserPwd", ErrorMessage = "两次密码不一致")]

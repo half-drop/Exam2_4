@@ -1,0 +1,79 @@
+﻿@model Exam1_7.Models.Paper
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>作答页面</title>
+</head>
+<body>
+    <h1>试卷名称: @Model.PaperName</h1>
+
+    @using (Html.BeginForm("SubmitAnswers", "Users", new { paperId = Model.PaperID }, FormMethod.Post))
+    {
+        <h2>判断题</h2>
+        <ol>
+            @foreach (var item in (List<Exam1_7.Models.JudgeProblem>)ViewData["JudgeProblems"])
+            {
+                <li>
+                    <p>@item.Title</p>
+                    <label>
+                        <input type="radio" name="Judge_@item.ID" value="true" /> 正确
+                    </label>
+                    <label>
+                        <input type="radio" name="Judge_@item.ID" value="false" /> 错误
+                    </label>
+                </li>
+            }
+        </ol>
+
+        <h2>单选题</h2>
+        <ol>
+            @foreach (var item in (List<Exam1_7.Models.SingleProblem>)ViewData["SingleProblems"])
+            {
+                <li>
+                    @item.Title
+                    <ol type="A">
+                        <li><input type="radio" name="Single_@item.ID" value="A" /> @item.AnswerA</li>
+                        <li><input type="radio" name="Single_@item.ID" value="B" /> @item.AnswerB</li>
+                        <li><input type="radio" name="Single_@item.ID" value="C" /> @item.AnswerC</li>
+                        <li><input type="radio" name="Single_@item.ID" value="D" /> @item.AnswerD</li>
+                    </ol>
+                </li>
+            }
+        </ol>
+
+        <h2>多选题</h2>
+        <ol>
+            @foreach (var item in (List<Exam1_7.Models.MultiProblem>)ViewData["MultiProblems"])
+            {
+                <li>
+                    @item.Title
+                    <ol type="A">
+                        <li><input type="checkbox" name="@( "Multi_" + item.ID + "[]" )" value="A" /> @item.AnswerA</li>
+                        <li><input type="checkbox" name="@( "Multi_" + item.ID + "[]" )" value="B" /> @item.AnswerB</li>
+                        <li><input type="checkbox" name="@( "Multi_" + item.ID + "[]" )" value="C" /> @item.AnswerC</li>
+                        <li><input type="checkbox" name="@( "Multi_" + item.ID + "[]" )" value="D" /> @item.AnswerD</li>
+                    </ol>
+                </li>
+            }
+        </ol>
+
+        <h2>填空题</h2>
+        <ol>
+            @foreach (var item in (List<Exam1_7.Models.FillBlankProblem>)ViewData["FillBlankProblems"])
+            {
+                <li>
+                    <p>@Html.Raw(@item.FrontTitle + "_____" + @item.BackTitle)</p>
+                    @Html.TextBox("FillBlank_" + item.ID, "", new { @class = "form-control" })
+                </li>
+            }
+        </ol>
+
+        <input type="submit" value="提交答案" class="btn btn-primary" />
+    }
+</body>
+</html>

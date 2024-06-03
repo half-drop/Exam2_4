@@ -1,0 +1,16 @@
+﻿@model Exam1_7.Models.User
+
+<h2>欢迎, @Model.UserName!</h2>
+<p>用户ID: @Model.UserID</p>
+<p>用户名: @Model.UserName</p>
+<p>密码: @Model.UserPwd</p>
+<p>权限: @Model.UserPower</p>
+<p>班级: @Model.Classname</p>
+<p>邮箱: @Model.UserEmail</p>
+
+@if (ViewBag.UserPower == 1)
+{
+    <a href="@Url.Action("AdminComposePaper")" class="btn btn-primary">组一套试卷</a>
+}
+<a href="@Url.Action("TakeExam", new { paperId = ViewBag.RandomPaperId })" class="btn btn-primary">开始考试</a>
+<a href="@Url.Action("HistoryScores")" class="btn btn-primary">显示历史成绩详情</a>

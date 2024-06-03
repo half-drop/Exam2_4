@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure.Interception;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -190,15 +191,16 @@ namespace Exam1_7.Controllers
 
         #endregion Exam2_9
 
-        #region Exam3_10_login
+        #region Exam3_10_login_simplified
 
-        //        [Route("login")]
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult Login()
         {
             return View();
         }
 
+        [HttpPost]
         public ActionResult Login(string username, string password)
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
@@ -216,11 +218,44 @@ namespace Exam1_7.Controllers
             {
                 FormsAuthentication.SetAuthCookie(username, false);
                 TempData["Username"] = username;
-                return RedirectToAction("ComposePaper");
+                TempData["UserPower"] = user.UserPower;
+                // 使用统一的Dashboard视图，通过用户权限区分显示内容
+                return RedirectToAction("Dashboard");
             }
         }
 
-        #endregion Exam3_10_login
+        #endregion Exam3_10_login_simplified
+
+        #region Dashboard
+
+        [Authorize]
+        public ActionResult Dashboard()
+        {
+            var username = User.Identity.Name;
+            var user = db.Users.FirstOrDefault(u => u.UserName == username);
+            if (user == null)
+            {
+                return HttpNotFound("用户未找到");
+            }
+
+            ViewBag.UserPower = user.UserPower;
+
+            var availablePapers = db.Papers.Where(p => p.PaperState).ToList();
+            if (!availablePapers.Any())
+            {
+                ViewBag.RandomPaperId = 0; // 或处理无有效试卷的情况
+            }
+            else
+            {
+                Random rnd = new Random();
+                int index = rnd.Next(availablePapers.Count); // 随机选择一个索引
+                ViewBag.RandomPaperId = availablePapers[index].PaperID; // 随机试卷ID
+            }
+
+            return View(user);
+        }
+
+        #endregion Dashboard
 
         #region ComposePaper
 
@@ -291,6 +326,279 @@ namespace Exam1_7.Controllers
 
             ViewBag.Score = score;
             return View("Result", ViewBag);
+        }
+
+        #region AdminComposePaper
+
+        // GET: AdminComposePaper
+        public ActionResult AdminComposePaper()
+        {
+            return View();
+        }
+
+        // POST: AdminComposePaper
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AdminComposePaper(string paperName, int judgeCount, int judgeMark, int singleCount, int singleMark, int multiCount, int multiMark, int fillBlankCount, int fillBlankMark)
+        {
+            if (string.IsNullOrEmpty(paperName))
+            {
+                ViewBag.Error = "试卷名称不能为空";
+                return View();
+            }
+
+            // 创建试卷实体并保存
+            var paper = new Paper
+            {
+                PaperName = paperName,
+                CourseID = 1,
+                PaperState = true,
+                Time = DateTime.Now,
+                Longth = judgeCount + singleCount + multiCount + fillBlankCount,
+                SumMark = judgeCount * judgeMark + singleCount * singleMark + multiCount * multiMark + fillBlankCount * fillBlankMark
+            };
+            db.Papers.Add(paper);
+            db.SaveChanges();
+
+            // 随机选择题目
+            var judgeProblems = db.JudgeProblems.OrderBy(j => Guid.NewGuid()).Take(judgeCount).ToList();
+            var singleProblems = db.SingleProblems.OrderBy(s => Guid.NewGuid()).Take(singleCount).ToList();
+            var multiProblems = db.MultiProblems.OrderBy(m => Guid.NewGuid()).Take(multiCount).ToList();
+            var fillBlankProblems = db.FillBlankProblems.OrderBy(f => Guid.NewGuid()).Take(fillBlankCount).ToList();
+
+            // 保存选择的题目到PaperDetail
+            foreach (var problem in judgeProblems)
+            {
+                db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Judge", Mark = judgeMark });
+            }
+            foreach (var problem in singleProblems)
+            {
+                db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Single", Mark = singleMark });
+            }
+            foreach (var problem in multiProblems)
+            {
+                db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Multi", Mark = multiMark });
+            }
+            foreach (var problem in fillBlankProblems)
+            {
+                db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "FillBlank", Mark = fillBlankMark });
+            }
+
+            db.SaveChanges();
+
+            return RedirectToAction("TakeExam", new { paperId = paper.PaperID });
+        }
+
+        #endregion AdminComposePaper
+
+        #region TakeExam
+
+        public ActionResult TakeExam(int paperId)
+        {
+            var paper = db.Papers.Include(p => p.PaperDetails).FirstOrDefault(p => p.PaperID == paperId);
+            if (paper == null)
+            {
+                return HttpNotFound("未找到指定的试卷");
+            }
+
+            // 创建或更新学生的考试记录
+            var studentExam = new StudentExam
+            {
+                UserID = User.Identity.Name,  // 假设用户已登录并且用户名可以通过User.Identity.Name获取
+                CourseID = paper.CourseID,
+                PaperID = paperId,
+                BegainTime = DateTime.Now,
+                ExamState = "Started"  // 标记考试状态为开始
+            };
+
+            db.StudentExams.Add(studentExam);
+            db.SaveChanges();
+
+            // 存储考试ID以便提交答案时使用
+            TempData["StudentExamId"] = studentExam.StudentExamId;
+
+            // 加载各种题型
+            ViewData["JudgeProblems"] = paper.PaperDetails.Where(pd => pd.Type == "Judge")
+                                                          .Select(pd => db.JudgeProblems.Find(pd.TitleID)).ToList();
+            ViewData["SingleProblems"] = paper.PaperDetails.Where(pd => pd.Type == "Single")
+                                                           .Select(pd => db.SingleProblems.Find(pd.TitleID)).ToList();
+            ViewData["MultiProblems"] = paper.PaperDetails.Where(pd => pd.Type == "Multi")
+                                                          .Select(pd => db.MultiProblems.Find(pd.TitleID)).ToList();
+            ViewData["FillBlankProblems"] = paper.PaperDetails.Where(pd => pd.Type == "FillBlank")
+                                                              .Select(pd => db.FillBlankProblems.Find(pd.TitleID)).ToList();
+
+            return View(paper);
+        }
+
+        #endregion TakeExam
+
+        #region SubmitAnswers
+
+        [HttpPost]
+        public ActionResult SubmitAnswers(int paperId, FormCollection answers)
+        {
+            var paper = db.Papers.Include(p => p.PaperDetails).FirstOrDefault(p => p.PaperID == paperId);
+            if (paper == null)
+            {
+                return HttpNotFound("未找到指定的试卷");
+            }
+
+            int studentExamId = (int)TempData["StudentExamId"];
+            var studentExam = db.StudentExams.Find(studentExamId);
+            if (studentExam == null)
+            {
+                return HttpNotFound("未找到学生考试记录");
+            }
+
+            int totalScore = 0;
+
+            // 判断题处理
+            foreach (var detail in paper.PaperDetails.Where(pd => pd.Type == "Judge"))
+            {
+                var problem = db.JudgeProblems.Find(detail.TitleID);
+                var userAnswer = answers["Judge_" + problem.ID];
+                bool isCorrect = (userAnswer == "true" && problem.Answer) || (userAnswer == "false" && !problem.Answer);
+
+                db.StudentJudgeProblems.Add(new StudentJudgeProblem
+                {
+                    StudentExamId = studentExam.StudentExamId,
+                    JudgeProblemID = problem.ID,
+                    answer = userAnswer == "true"
+                });
+
+                totalScore += isCorrect ? detail.Mark : 0;
+            }
+
+            // 单选题处理
+            foreach (var detail in paper.PaperDetails.Where(pd => pd.Type == "Single"))
+            {
+                var problem = db.SingleProblems.Find(detail.TitleID);
+                var userAnswer = answers["Single_" + problem.ID];
+                bool isCorrect = userAnswer == problem.Answer;
+
+                db.StudentSingles.Add(new StudentSingle
+                {
+                    StudentExamId = studentExam.StudentExamId,
+                    SingleProblemID = problem.ID,
+                    answer = userAnswer
+                });
+
+                totalScore += isCorrect ? detail.Mark : 0;
+            }
+
+            // 多选题处理
+            foreach (var detail in paper.PaperDetails.Where(pd => pd.Type == "Multi"))
+            {
+                var problem = db.MultiProblems.Find(detail.TitleID);
+                var userAnswers = answers.AllKeys
+                    .Where(k => k.StartsWith("Multi_" + problem.ID + "["))
+                    .Select(k => answers[k])
+                    .OrderBy(a => a);
+
+                var correctAnswers = problem.Answer.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(a => a.Trim()).OrderBy(a => a);
+                bool isCorrect = userAnswers.SequenceEqual(correctAnswers);
+
+                db.StudentMultiProblems.Add(new StudentMultiProblem
+                {
+                    StudentExamId = studentExam.StudentExamId,
+                    MultiProblemID = problem.ID,
+                    answer = string.Join(",", userAnswers)
+                });
+
+                totalScore += isCorrect ? detail.Mark : 0;
+            }
+
+            // 填空题处理
+            foreach (var detail in paper.PaperDetails.Where(pd => pd.Type == "FillBlank"))
+            {
+                var problem = db.FillBlankProblems.Find(detail.TitleID);
+                var userAnswer = answers["FillBlank_" + problem.ID];
+                bool isCorrect = userAnswer == problem.Answer;
+
+                db.StudentFillBlankProblems.Add(new StudentFillBlankProblem
+                {
+                    StudentExamId = studentExam.StudentExamId,
+                    FillBlankProblemID = problem.ID,
+                    answer = userAnswer
+                });
+
+                totalScore += isCorrect ? detail.Mark : 0;
+            }
+
+            // 更新学生考试记录的结束时间和总分
+            studentExam.EndTime = DateTime.Now;
+            studentExam.ExamState = "Completed";
+            db.SaveChanges();
+
+            // 将分数保存到Score表
+            var score = new Score
+            {
+                UserID = User.Identity.Name,
+                PaperID = paperId,
+                CourseID = paper.CourseID,
+                Score1 = totalScore,
+                ExamTime = (DateTime)studentExam.EndTime
+            };
+            db.Scores.Add(score);
+            db.SaveChanges();
+
+            // 重定向到结果页面
+            return RedirectToAction("ResultPage", new { studentExamId = studentExam.StudentExamId });
+        }
+
+        #endregion SubmitAnswers
+
+        public ActionResult ResultPage(int studentExamId)
+        {
+            var studentExam = db.StudentExams
+                .Include(se => se.StudentJudgeProblems.Select(jp => jp.JudgeProblem))
+                .Include(se => se.StudentSingles.Select(sp => sp.SingleProblem))
+                .Include(se => se.StudentMultiProblems.Select(mp => mp.MultiProblem))
+                .Include(se => se.StudentFillBlankProblems.Select(fp => fp.FillBlankProblem))
+                .FirstOrDefault(se => se.StudentExamId == studentExamId);
+
+            if (studentExam == null)
+            {
+                return HttpNotFound("未找到考试记录");
+            }
+
+            var totalScore = db.Scores.FirstOrDefault(s => s.UserID == studentExam.UserID && s.PaperID == studentExam.PaperID && s.ExamTime == studentExam.EndTime)?.Score1;
+
+            ViewBag.TotalScore = totalScore;
+
+            return View(studentExam);
+        }
+
+        public ActionResult HistoryScores()
+        {
+            string userId = User.Identity.Name;
+
+            var historyScores = (from se in db.StudentExams
+                                 join p in db.Papers on se.PaperID equals p.PaperID
+                                 join c in db.Courses on p.CourseID equals c.ID
+                                 where se.UserID == userId
+                                 select new
+                                 {
+                                     se.StudentExamId,
+                                     se.BegainTime,
+                                     se.EndTime,
+                                     p.PaperName,
+                                     CourseName = c.Name,
+                                     Score = (from s in db.Scores
+                                              where s.UserID == se.UserID && s.PaperID == se.PaperID && s.ExamTime == se.EndTime
+                                              select s.Score1).FirstOrDefault()
+                                 }).ToList()
+                                 .Select(exam => new HistoryScoreViewModel
+                                 {
+                                     StudentExamId = exam.StudentExamId,
+                                     BegainTime = exam.BegainTime,
+                                     EndTime = exam.EndTime,
+                                     PaperName = exam.PaperName,
+                                     CourseName = exam.CourseName,
+                                     Score = exam.Score
+                                 }).ToList();
+
+            return View(historyScores);
         }
     }
 }
