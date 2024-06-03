@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = null;
+    ViewBag.Title = "创建试卷";
 }
 
 <!DOCTYPE html>
@@ -48,7 +48,7 @@
             @Html.TextBox("fillBlankMark", null, new { type = "number" })
         </div>
 
-        <button type="submit">创建试卷</button>
+        <button type="submit" class="btn btn-primary">创建试卷</button>
     }
 
     @if (ViewBag.Error != null)

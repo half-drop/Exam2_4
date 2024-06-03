@@ -492,13 +492,21 @@ namespace Exam1_7.Controllers
             {
                 var problem = db.MultiProblems.Find(detail.TitleID);
                 var userAnswers = answers.AllKeys
-                    .Where(k => k.StartsWith("Multi_" + problem.ID + "["))
-                    .Select(a => a.Trim().Replace(",", ""))
-                    .Select(k => answers[k])
-                    .OrderBy(a => a);
+                        .Where(k => k.StartsWith("Multi_" + problem.ID + "["))
+                        .Select(k => answers[k])
+                        .OrderBy(a => a);
 
-                var correctAnswers = problem.Answer.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(a => a.Trim()).OrderBy(a => a);
-                bool isCorrect = userAnswers.SequenceEqual(correctAnswers);
+                var userAnswerString = userAnswers.Any() ? string.Join(",", userAnswers) : "";
+
+                // 直接从数据库获取并处理答案字符串
+                var correctAnswerString = problem.Answer
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(a => a.Trim())
+                    .OrderBy(a => a)
+                    .Aggregate((current, next) => current + "," + next);
+
+                // 直接比较字符串判断答案是否正确
+                bool isCorrect = userAnswerString.Equals(correctAnswerString);
 
                 db.StudentMultiProblems.Add(new StudentMultiProblem
                 {

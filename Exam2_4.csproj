@@ -293,7 +293,6 @@
     <Content Include="Views\Users\Dashboard.cshtml" />
     <Content Include="Views\Users\TakeExam.cshtml" />
     <Content Include="Views\Users\AdminComposePaper.cshtml" />
-    <Content Include="Views\Users\CreateSamplePaper.cshtml" />
     <Content Include="Views\Users\ResultPage.cshtml" />
     <Content Include="Views\Users\HistoryScores.cshtml" />
   </ItemGroup>
