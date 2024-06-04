@@ -12,7 +12,8 @@
 
 @if (ViewBag.UserPower == 1)
 {
-    <a href="@Url.Action("AdminComposePaper")" class="btn btn-primary">组一套试卷</a>
+    <a href="@Url.Action("AdminComposePaper")" class="btn btn-primary">组卷</a>
+    <a href="@Url.Action("AdminCheckPaper")" class="btn btn-primary">浏览试卷库</a>
 }
 <a href="@Url.Action("TakeExam", new { paperId = ViewBag.RandomPaperId })" class="btn btn-primary">开始考试</a>
 <a href="@Url.Action("HistoryScores")" class="btn btn-primary">显示历史成绩详情</a>

@@ -330,13 +330,11 @@ namespace Exam1_7.Controllers
 
         #region AdminComposePaper
 
-        // GET: AdminComposePaper
         public ActionResult AdminComposePaper()
         {
             return View();
         }
 
-        // POST: AdminComposePaper
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AdminComposePaper(string paperName, int judgeCount, int judgeMark, int singleCount, int singleMark, int multiCount, int multiMark, int fillBlankCount, int fillBlankMark)
@@ -347,7 +345,7 @@ namespace Exam1_7.Controllers
                 return View();
             }
 
-            // 创建试卷实体并保存
+            //创建试卷
             var paper = new Paper
             {
                 PaperName = paperName,
@@ -360,13 +358,13 @@ namespace Exam1_7.Controllers
             db.Papers.Add(paper);
             db.SaveChanges();
 
-            // 随机选择题目
+            //随机选题
             var judgeProblems = db.JudgeProblems.OrderBy(j => Guid.NewGuid()).Take(judgeCount).ToList();
             var singleProblems = db.SingleProblems.OrderBy(s => Guid.NewGuid()).Take(singleCount).ToList();
             var multiProblems = db.MultiProblems.OrderBy(m => Guid.NewGuid()).Take(multiCount).ToList();
             var fillBlankProblems = db.FillBlankProblems.OrderBy(f => Guid.NewGuid()).Take(fillBlankCount).ToList();
 
-            // 保存选择的题目到PaperDetail
+            //保存到PaperDetail
             foreach (var problem in judgeProblems)
             {
                 db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Judge", Mark = judgeMark });
@@ -402,7 +400,7 @@ namespace Exam1_7.Controllers
                 return HttpNotFound("未找到指定的试卷");
             }
 
-            // 创建或更新学生的考试记录
+            //创建学生的考试记录
             var studentExam = new StudentExam
             {
                 UserID = user.UserID,
@@ -415,10 +413,9 @@ namespace Exam1_7.Controllers
             db.StudentExams.Add(studentExam);
             db.SaveChanges();
 
-            // 存储考试ID以便提交答案时使用
+            //存储考试ID以便提交答案时使用
             TempData["StudentExamId"] = studentExam.StudentExamId;
 
-            // 加载各种题型
             ViewData["JudgeProblems"] = paper.PaperDetails.Where(pd => pd.Type == "Judge")
                                                           .Select(pd => db.JudgeProblems.Find(pd.TitleID)).ToList();
             ViewData["SingleProblems"] = paper.PaperDetails.Where(pd => pd.Type == "Single")
@@ -453,7 +450,7 @@ namespace Exam1_7.Controllers
 
             int totalScore = 0;
 
-            // 判断题处理
+            //判断题处理
             foreach (var detail in paper.PaperDetails.Where(pd => pd.Type == "Judge"))
             {
                 var problem = db.JudgeProblems.Find(detail.TitleID);
@@ -470,7 +467,7 @@ namespace Exam1_7.Controllers
                 totalScore += isCorrect ? detail.Mark : 0;
             }
 
-            // 单选题处理
+            //单选题处理
             foreach (var detail in paper.PaperDetails.Where(pd => pd.Type == "Single"))
             {
                 var problem = db.SingleProblems.Find(detail.TitleID);
@@ -487,7 +484,7 @@ namespace Exam1_7.Controllers
                 totalScore += isCorrect ? detail.Mark : 0;
             }
 
-            // 多选题处理
+            //多选题处理
             foreach (var detail in paper.PaperDetails.Where(pd => pd.Type == "Multi"))
             {
                 var problem = db.MultiProblems.Find(detail.TitleID);
@@ -498,14 +495,12 @@ namespace Exam1_7.Controllers
 
                 var userAnswerString = userAnswers.Any() ? string.Join(",", userAnswers) : "";
 
-                // 直接从数据库获取并处理答案字符串
                 var correctAnswerString = problem.Answer
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(a => a.Trim())
                     .OrderBy(a => a)
                     .Aggregate((current, next) => current + "," + next);
 
-                // 直接比较字符串判断答案是否正确
                 bool isCorrect = userAnswerString.Equals(correctAnswerString);
 
                 db.StudentMultiProblems.Add(new StudentMultiProblem
@@ -518,7 +513,7 @@ namespace Exam1_7.Controllers
                 totalScore += isCorrect ? detail.Mark : 0;
             }
 
-            // 填空题处理
+            //填空题处理
             foreach (var detail in paper.PaperDetails.Where(pd => pd.Type == "FillBlank"))
             {
                 var problem = db.FillBlankProblems.Find(detail.TitleID);
@@ -535,12 +530,12 @@ namespace Exam1_7.Controllers
                 totalScore += isCorrect ? detail.Mark : 0;
             }
 
-            // 更新学生考试记录的结束时间和总分
+            //更新学生考试记录
             studentExam.EndTime = DateTime.Now;
             studentExam.ExamState = "Completed";
             db.SaveChanges();
 
-            // 将分数保存到Score表
+            //保存到Score
             var user = db.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
             var score = new Score
             {
@@ -553,7 +548,6 @@ namespace Exam1_7.Controllers
             db.Scores.Add(score);
             db.SaveChanges();
 
-            // 重定向到结果页面
             return RedirectToAction("ResultPage", new { studentExamId = studentExam.StudentExamId });
         }
 
@@ -611,6 +605,21 @@ namespace Exam1_7.Controllers
                                  }).ToList();
 
             return View(historyScores);
+        }
+
+        public ActionResult AdminCheckPaper()
+        {
+            var papers = db.Papers.Include(p => p.Course).Where(p => p.PaperState == true).ToList().Select(p => new PaperViewModel
+            {
+                PaperID = p.PaperID,
+                PaperName = p.PaperName,
+                CourseName = p.Course.Name,
+                Time = p.Time,
+                Longth = p.Longth,
+                SumMark = p.SumMark
+            }).ToList();
+
+            return View(papers);
         }
     }
 }
