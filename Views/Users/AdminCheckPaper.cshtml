@@ -9,11 +9,13 @@
 <table class="table">
     <thead>
         <tr>
+            <th>试卷ID</th>
             <th>试卷名称</th>
             <th>课程名称</th>
             <th>考试时间</th>
-            <th>时长(分钟)</th>
+            <th>题量</th>
             <th>总分</th>
+            <th>状态</th>
             <th>操作</th>
         </tr>
     </thead>
@@ -21,11 +23,13 @@
         @foreach (var paper in Model)
         {
             <tr>
+                <td>@paper.PaperID</td>
                 <td>@paper.PaperName</td>
                 <td>@paper.CourseName</td>
                 <td>@paper.Time.ToString("yyyy-MM-dd")</td>
                 <td>@paper.Longth</td>
                 <td>@paper.SumMark</td>
+                <td>@paper.PaperState</td>
                 <td>
                     <a href="@Url.Action("TakeExam", "Users", new { paperId = paper.PaperID })" class="btn btn-primary">测试答题</a>
                 </td>

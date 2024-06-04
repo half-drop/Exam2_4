@@ -328,8 +328,6 @@ namespace Exam1_7.Controllers
             return View("Result", ViewBag);
         }
 
-        #region AdminComposePaper
-
         public ActionResult AdminComposePaper()
         {
             return View();
@@ -337,7 +335,7 @@ namespace Exam1_7.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AdminComposePaper(string paperName, int judgeCount, int judgeMark, int singleCount, int singleMark, int multiCount, int multiMark, int fillBlankCount, int fillBlankMark)
+        public ActionResult AdminComposePaper(string paperName, int judgeCount, int judgeMark, int singleCount, int singleMark, int multiCount, int multiMark, int fillBlankCount, int fillBlankMark, int numberOfSets)
         {
             if (string.IsNullOrEmpty(paperName))
             {
@@ -345,60 +343,63 @@ namespace Exam1_7.Controllers
                 return View();
             }
 
-            //创建试卷
-            var paper = new Paper
+            for (int i = 0; i < numberOfSets; i++)
             {
-                PaperName = paperName,
-                CourseID = 1,
-                PaperState = true,
-                Time = DateTime.Now,
-                Longth = judgeCount + singleCount + multiCount + fillBlankCount,
-                SumMark = judgeCount * judgeMark + singleCount * singleMark + multiCount * multiMark + fillBlankCount * fillBlankMark
-            };
-            db.Papers.Add(paper);
-            db.SaveChanges();
+                // 创建试卷
+                var paper = new Paper
+                {
+                    PaperName = paperName,
+                    CourseID = 1,
+                    PaperState = true,
+                    Time = DateTime.Now,
+                    Longth = judgeCount + singleCount + multiCount + fillBlankCount,
+                    SumMark = judgeCount * judgeMark + singleCount * singleMark + multiCount * multiMark + fillBlankCount * fillBlankMark
+                };
+                db.Papers.Add(paper);
 
-            //随机选题
-            var judgeProblems = db.JudgeProblems.OrderBy(j => Guid.NewGuid()).Take(judgeCount).ToList();
-            var singleProblems = db.SingleProblems.OrderBy(s => Guid.NewGuid()).Take(singleCount).ToList();
-            var multiProblems = db.MultiProblems.OrderBy(m => Guid.NewGuid()).Take(multiCount).ToList();
-            var fillBlankProblems = db.FillBlankProblems.OrderBy(f => Guid.NewGuid()).Take(fillBlankCount).ToList();
+                // 随机选题
+                var judgeProblems = db.JudgeProblems.OrderBy(j => Guid.NewGuid()).Take(judgeCount).ToList();
+                var singleProblems = db.SingleProblems.OrderBy(s => Guid.NewGuid()).Take(singleCount).ToList();
+                var multiProblems = db.MultiProblems.OrderBy(m => Guid.NewGuid()).Take(multiCount).ToList();
+                var fillBlankProblems = db.FillBlankProblems.OrderBy(f => Guid.NewGuid()).Take(fillBlankCount).ToList();
 
-            //保存到PaperDetail
-            foreach (var problem in judgeProblems)
-            {
-                db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Judge", Mark = judgeMark });
-            }
-            foreach (var problem in singleProblems)
-            {
-                db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Single", Mark = singleMark });
-            }
-            foreach (var problem in multiProblems)
-            {
-                db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Multi", Mark = multiMark });
-            }
-            foreach (var problem in fillBlankProblems)
-            {
-                db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "FillBlank", Mark = fillBlankMark });
+                // 保存到PaperDetail
+                foreach (var problem in judgeProblems)
+                {
+                    db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Judge", Mark = judgeMark });
+                }
+                foreach (var problem in singleProblems)
+                {
+                    db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Single", Mark = singleMark });
+                }
+                foreach (var problem in multiProblems)
+                {
+                    db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "Multi", Mark = multiMark });
+                }
+                foreach (var problem in fillBlankProblems)
+                {
+                    db.PaperDetails.Add(new PaperDetail { PaperID = paper.PaperID, TitleID = problem.ID, Type = "FillBlank", Mark = fillBlankMark });
+                }
+
+                db.SaveChanges();
             }
 
-            db.SaveChanges();
-
-            return RedirectToAction("TakeExam", new { paperId = paper.PaperID });
+            return RedirectToAction("AdminCheckPaper");
         }
-
-        #endregion AdminComposePaper
 
         #region TakeExam
 
         public ActionResult TakeExam(int paperId)
         {
             var user = db.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
-            var paper = db.Papers.Include(p => p.PaperDetails).FirstOrDefault(p => p.PaperID == paperId);
+            var paper = db.Papers.Include(p => p.PaperDetails).FirstOrDefault(p => p.PaperID == paperId && p.PaperState == true);
             if (paper == null)
             {
-                return HttpNotFound("未找到指定的试卷");
+                return HttpNotFound("未找到指定的试卷或该试卷已不可用");
             }
+
+            paper.PaperState = false;
+            db.SaveChanges();
 
             //创建学生的考试记录
             var studentExam = new StudentExam
@@ -419,11 +420,11 @@ namespace Exam1_7.Controllers
             ViewData["JudgeProblems"] = paper.PaperDetails.Where(pd => pd.Type == "Judge")
                                                           .Select(pd => db.JudgeProblems.Find(pd.TitleID)).ToList();
             ViewData["SingleProblems"] = paper.PaperDetails.Where(pd => pd.Type == "Single")
-                                                           .Select(pd => db.SingleProblems.Find(pd.TitleID)).ToList();
+                                                          .Select(pd => db.SingleProblems.Find(pd.TitleID)).ToList();
             ViewData["MultiProblems"] = paper.PaperDetails.Where(pd => pd.Type == "Multi")
                                                           .Select(pd => db.MultiProblems.Find(pd.TitleID)).ToList();
             ViewData["FillBlankProblems"] = paper.PaperDetails.Where(pd => pd.Type == "FillBlank")
-                                                              .Select(pd => db.FillBlankProblems.Find(pd.TitleID)).ToList();
+                                                          .Select(pd => db.FillBlankProblems.Find(pd.TitleID)).ToList();
 
             return View(paper);
         }
@@ -609,14 +610,16 @@ namespace Exam1_7.Controllers
 
         public ActionResult AdminCheckPaper()
         {
-            var papers = db.Papers.Include(p => p.Course).Where(p => p.PaperState == true).ToList().Select(p => new PaperViewModel
+            //var papers = db.Papers.Include(p => p.Course).Where(p => p.PaperState == true).ToList().Select(p => new PaperViewModel
+            var papers = db.Papers.Include(p => p.Course).ToList().Select(p => new PaperViewModel
             {
                 PaperID = p.PaperID,
                 PaperName = p.PaperName,
                 CourseName = p.Course.Name,
                 Time = p.Time,
                 Longth = p.Longth,
-                SumMark = p.SumMark
+                SumMark = p.SumMark,
+                PaperState = p.PaperState
             }).ToList();
 
             return View(papers);
