@@ -48,6 +48,11 @@
             @Html.TextBox("fillBlankMark", null, new { type = "number" })
         </div>
 
+        <div>
+            <label>创建套数:</label>
+            @Html.TextBox("numberOfSets", null, new { type = "number", value = "1" })
+        </div>
+
         <button type="submit" class="btn btn-primary">创建试卷</button>
     }
 
