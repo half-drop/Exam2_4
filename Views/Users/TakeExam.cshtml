@@ -36,7 +36,10 @@
                         <li><input type="radio" name="Single_@item.ID" value="A" /> @item.AnswerA</li>
                         <li><input type="radio" name="Single_@item.ID" value="B" /> @item.AnswerB</li>
                         <li><input type="radio" name="Single_@item.ID" value="C" /> @item.AnswerC</li>
-                        <li><input type="radio" name="Single_@item.ID" value="D" /> @item.AnswerD</li>
+                        @if (!string.IsNullOrEmpty(@item.AnswerD))
+                        {
+                            <li><input type="radio" name="Single_@item.ID" value="D" /> @item.AnswerD</li>
+                        }
                     </ol>
                 </li>
             }
